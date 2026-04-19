@@ -40,7 +40,7 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 					}
 					break;
 				}
-				case 'A':
+				case 'B':
 					for (auto& object : m_ppObjects)
 					{
 						CExplosiveObject *pExplosiveObject = static_cast<CExplosiveObject *>(object.get());
