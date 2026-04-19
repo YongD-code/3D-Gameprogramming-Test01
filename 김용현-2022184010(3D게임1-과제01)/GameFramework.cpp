@@ -32,7 +32,7 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 	ChangeState(GAMESTATE::LOADING);
 
 	m_hLoadingBitmap = (HBITMAP)::LoadImage(m_hInstance, MAKEINTRESOURCE(IDB_BITMAP1),IMAGE_BITMAP,0, 0,LR_CREATEDIBSECTION);
-
+	m_hMenuBitmap = (HBITMAP)::LoadImage(m_hInstance, MAKEINTRESOURCE(IDB_BITMAP2), IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION);
 
 
 	return(true);
@@ -234,6 +234,9 @@ void CGameFramework::DrawBitmap(HBITMAP hBitmap)
 	RECT rcClient;
 	::GetClientRect(m_hWnd, &rcClient);
 
+	::SetStretchBltMode(m_hDCFrameBuffer, HALFTONE);
+	::SetBrushOrgEx(m_hDCFrameBuffer, 0, 0, NULL);
+
 	::StretchBlt(
 		m_hDCFrameBuffer,
 		0, 0,
@@ -252,15 +255,19 @@ void CGameFramework::DrawBitmap(HBITMAP hBitmap)
 
 void CGameFramework::RenderMenuBackground()
 {
-
-	// DrawBitmap(m_hMenuBitmap);
-
 	RECT rcClient;
 	::GetClientRect(m_hWnd, &rcClient);
 
-	HBRUSH hBrush = ::CreateSolidBrush(RGB(18, 24, 40));
-	::FillRect(m_hDCFrameBuffer, &rcClient, hBrush);
-	::DeleteObject(hBrush);
+	if (m_hMenuBitmap)
+	{
+		DrawBitmap(m_hMenuBitmap);
+	}
+	else
+	{
+		HBRUSH hBrush = ::CreateSolidBrush(RGB(18, 24, 40));
+		::FillRect(m_hDCFrameBuffer, &rcClient, hBrush);
+		::DeleteObject(hBrush);
+	}
 
 	HPEN hPen = ::CreatePen(PS_SOLID, 2, RGB(70, 90, 140));
 	HPEN hOldPen = (HPEN)::SelectObject(m_hDCFrameBuffer, hPen);
@@ -296,7 +303,7 @@ void CGameFramework::RenderLoadingScreen()
 	int percentSize = max(22, height / 20);
 	int guideSize = max(16, height / 36);
 
-	DrawCenteredText(rcClient, _T("LOADING..."), titleY, titleSize, RGB(255, 255, 255), true);
+	DrawCenteredText(rcClient, _T("LOADING..."), titleY, titleSize, RGB(0, 0, 0), true);
 
 	int nPercent = (int)(m_Loading * 20.0f);
 	if (nPercent > 100) nPercent = 100;
@@ -304,8 +311,8 @@ void CGameFramework::RenderLoadingScreen()
 	TCHAR szLoading[64];
 	_stprintf_s(szLoading, _T("%d%%"), nPercent);
 
-	DrawCenteredText(rcClient, szLoading, percentY, percentSize, RGB(210, 210, 210), false);
-	DrawCenteredText(rcClient, _T("잠시 후 시작 메뉴로 이동합니다"), guideY, guideSize, RGB(180, 180, 180), false);
+	DrawCenteredText(rcClient, szLoading, percentY, percentSize, RGB(0, 0, 0), false);
+	DrawCenteredText(rcClient, _T("잠시 후 시작 메뉴로 이동합니다"), guideY, guideSize, RGB(255, 255, 255), false);
 }
 
 void CGameFramework::RenderStartMenu()
@@ -328,17 +335,17 @@ void CGameFramework::RenderStartMenu()
 
 	int titleSize = max(32, height / 12);
 	int subSize = max(18, height / 28);
-	int menuSize = max(28, height / 18);
+	int menuSize = max(40, height / 18);
 	int guideSize = max(24, height / 40);
 
-	DrawCenteredText(rcClient, _T("3D GAME PROJECT 01"), titleY, titleSize, RGB(0, 0, 0), true);
+	DrawCenteredText(rcClient, _T("3D GAME PROJECT 01"), titleY, titleSize, RGB(255, 255, 255), true);
 
 	DrawCenteredText(
 		rcClient,
 		_T("START"),
 		menuBaseY,
 		menuSize,
-		(m_StartMenuIdx == 0) ? RGB(255, 255, 255) : RGB(255, 0, 0),
+		(m_StartMenuIdx == 0) ? RGB(255, 255, 255) : RGB(0, 0, 255),
 		true
 	);
 
@@ -356,11 +363,11 @@ void CGameFramework::RenderStartMenu()
 		_T("QUIT"),
 		menuBaseY + menuGap * 2,
 		menuSize,
-		(m_StartMenuIdx == 2) ? RGB(255, 255, 255) : RGB(0, 0, 255),
+		(m_StartMenuIdx == 2) ? RGB(255, 255, 255) : RGB(255, 0, 0),
 		true
 	);
 
-	DrawCenteredText(rcClient, _T("방향키: 이동 / Enter: 선택"), guideY, guideSize, RGB(255, 255, 255), false);
+	DrawCenteredText(rcClient, _T("방향키: 이동 / Enter: 선택"), guideY, guideSize, RGB(255, 255, 255), true);
 }
 
 void CGameFramework::RenderSettingsMenu()
