@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "GameFramework.h"
+#include "Resource.h"
+#include "resource1.h"
 
 CGameFramework::CGameFramework()
 {
@@ -29,8 +31,8 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 
 	ChangeState(GAMESTATE::LOADING);
 
-	// m_hMenuBitmap = (HBITMAP)::LoadImage(NULL, _T("menu_bg.bmp"), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
-	// m_hLoadingBitmap = (HBITMAP)::LoadImage(NULL, _T("loading_bg.bmp"), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
+	m_hLoadingBitmap = (HBITMAP)::LoadImage(m_hInstance, MAKEINTRESOURCE(IDB_BITMAP1),IMAGE_BITMAP,0, 0,LR_CREATEDIBSECTION);
+
 
 
 	return(true);
@@ -179,8 +181,13 @@ void CGameFramework::DrawSettingItem(LPCTSTR pszLeft, LPCTSTR pszRight, int y, b
 	RECT rcClient;
 	::GetClientRect(m_hWnd, &rcClient);
 
+	int width = rcClient.right - rcClient.left;
+	int height = rcClient.bottom - rcClient.top;
+
+	int fontSize = max(20, height / 24);
+
 	HFONT hFont = ::CreateFont(
-		26, 0, 0, 0,
+		fontSize, 0, 0, 0,
 		bSelected ? FW_BOLD : FW_NORMAL,
 		FALSE, FALSE, FALSE,
 		DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
@@ -192,24 +199,55 @@ void CGameFramework::DrawSettingItem(LPCTSTR pszLeft, LPCTSTR pszRight, int y, b
 	::SetBkMode(m_hDCFrameBuffer, TRANSPARENT);
 	::SetTextColor(m_hDCFrameBuffer, bSelected ? RGB(255, 220, 0) : RGB(230, 230, 230));
 
+	int marginX = width / 5;
+
 	RECT rcLeft = rcClient;
-	rcLeft.left = 120;
-	rcLeft.right = rcClient.right / 2;
+	rcLeft.left = marginX;
+	rcLeft.right = width / 2;
 
 	RECT rcRight = rcClient;
-	rcRight.left = rcClient.right / 2;
-	rcRight.right = rcClient.right - 120;
+	rcRight.left = width / 2;
+	rcRight.right = width - marginX;
 
 	rcLeft.top = y;
-	rcLeft.bottom = y + 40;
+	rcLeft.bottom = y + fontSize + 20;
 	rcRight.top = y;
-	rcRight.bottom = y + 40;
+	rcRight.bottom = y + fontSize + 20;
 
 	::DrawText(m_hDCFrameBuffer, pszLeft, -1, &rcLeft, DT_LEFT | DT_VCENTER | DT_SINGLELINE);
 	::DrawText(m_hDCFrameBuffer, pszRight, -1, &rcRight, DT_RIGHT | DT_VCENTER | DT_SINGLELINE);
 
 	::SelectObject(m_hDCFrameBuffer, hOldFont);
 	::DeleteObject(hFont);
+}
+
+void CGameFramework::DrawBitmap(HBITMAP hBitmap)
+{
+	if (!hBitmap) return;
+
+	BITMAP bmp;
+	::GetObject(hBitmap, sizeof(BITMAP), &bmp);
+
+	HDC hMemDC = ::CreateCompatibleDC(m_hDCFrameBuffer);
+	HBITMAP hOldBitmap = (HBITMAP)::SelectObject(hMemDC, hBitmap);
+
+	RECT rcClient;
+	::GetClientRect(m_hWnd, &rcClient);
+
+	::StretchBlt(
+		m_hDCFrameBuffer,
+		0, 0,
+		rcClient.right - rcClient.left,
+		rcClient.bottom - rcClient.top,
+		hMemDC,
+		0, 0,
+		bmp.bmWidth,
+		bmp.bmHeight,
+		SRCCOPY
+	);
+
+	::SelectObject(hMemDC, hOldBitmap);
+	::DeleteDC(hMemDC);
 }
 
 void CGameFramework::RenderMenuBackground()
@@ -233,15 +271,32 @@ void CGameFramework::RenderMenuBackground()
 
 void CGameFramework::RenderLoadingScreen()
 {
-
-	// DrawBitmap(m_hLoadingBitmap);
-
 	RECT rcClient;
 	::GetClientRect(m_hWnd, &rcClient);
 
-	RenderMenuBackground();
+	if (m_hLoadingBitmap)
+	{
+		DrawBitmap(m_hLoadingBitmap);
+	}
+	else
+	{
+		HBRUSH hBrush = ::CreateSolidBrush(RGB(10, 10, 20));
+		::FillRect(m_hDCFrameBuffer, &rcClient, hBrush);
+		::DeleteObject(hBrush);
+	}
 
-	DrawCenteredText(rcClient, _T("LOADING..."), 170, 42, RGB(255, 255, 255), true);
+	int width = rcClient.right - rcClient.left;
+	int height = rcClient.bottom - rcClient.top;
+
+	int titleY = height / 3;
+	int percentY = titleY + height / 8;
+	int guideY = percentY + height / 8;
+
+	int titleSize = max(32, height / 12);
+	int percentSize = max(22, height / 20);
+	int guideSize = max(16, height / 36);
+
+	DrawCenteredText(rcClient, _T("LOADING..."), titleY, titleSize, RGB(255, 255, 255), true);
 
 	int nPercent = (int)(m_Loading * 20.0f);
 	if (nPercent > 100) nPercent = 100;
@@ -249,8 +304,8 @@ void CGameFramework::RenderLoadingScreen()
 	TCHAR szLoading[64];
 	_stprintf_s(szLoading, _T("%d%%"), nPercent);
 
-	DrawCenteredText(rcClient, szLoading, 240, 26, RGB(210, 210, 210), false);
-	DrawCenteredText(rcClient, _T("잠시 후 시작 메뉴로 이동합니다"), 300, 20, RGB(180, 180, 180), false);
+	DrawCenteredText(rcClient, szLoading, percentY, percentSize, RGB(210, 210, 210), false);
+	DrawCenteredText(rcClient, _T("잠시 후 시작 메뉴로 이동합니다"), guideY, guideSize, RGB(180, 180, 180), false);
 }
 
 void CGameFramework::RenderStartMenu()
@@ -258,16 +313,54 @@ void CGameFramework::RenderStartMenu()
 	RECT rcClient;
 	::GetClientRect(m_hWnd, &rcClient);
 
+	int width = rcClient.right - rcClient.left;
+	int height = rcClient.bottom - rcClient.top;
+
 	RenderMenuBackground();
 
-	DrawCenteredText(rcClient, _T("3D GAME PROJECT 01"), 80, 52, RGB(255, 255, 255), true);
-	DrawCenteredText(rcClient, _T("메뉴를 선택하세요"), 145, 22, RGB(190, 190, 190), false);
+	int titleY = height / 6;
+	int subtitleY = height / 6 + height / 10;
 
-	DrawMenuItem(_T("START"), 220, (m_StartMenuIdx == 0),RGB(255,0,0));
-	DrawMenuItem(_T("SETTING"), 270, (m_StartMenuIdx == 1), RGB(0, 255, 0));
-	DrawMenuItem(_T("EXIT"), 320, (m_StartMenuIdx == 2), RGB(0, 0, 255));
+	int menuBaseY = height / 2 - height / 12;
+	int menuGap = max(40, height / 10);
 
-	DrawCenteredText(rcClient, _T("방향키: 이동 / Enter: 선택"), 400, 18, RGB(170, 170, 170), false);
+	int guideY = height - height / 6;
+
+	int titleSize = max(32, height / 12);
+	int subSize = max(18, height / 28);
+	int menuSize = max(28, height / 18);
+	int guideSize = max(24, height / 40);
+
+	DrawCenteredText(rcClient, _T("3D GAME PROJECT 01"), titleY, titleSize, RGB(0, 0, 0), true);
+
+	DrawCenteredText(
+		rcClient,
+		_T("START"),
+		menuBaseY,
+		menuSize,
+		(m_StartMenuIdx == 0) ? RGB(255, 255, 255) : RGB(255, 0, 0),
+		true
+	);
+
+	DrawCenteredText(
+		rcClient,
+		_T("SETTING"),
+		menuBaseY + menuGap,
+		menuSize,
+		(m_StartMenuIdx == 1) ? RGB(255, 255, 255) : RGB(0, 255, 0),
+		true
+	);
+
+	DrawCenteredText(
+		rcClient,
+		_T("QUIT"),
+		menuBaseY + menuGap * 2,
+		menuSize,
+		(m_StartMenuIdx == 2) ? RGB(255, 255, 255) : RGB(0, 0, 255),
+		true
+	);
+
+	DrawCenteredText(rcClient, _T("방향키: 이동 / Enter: 선택"), guideY, guideSize, RGB(255, 255, 255), false);
 }
 
 void CGameFramework::RenderSettingsMenu()
@@ -275,15 +368,30 @@ void CGameFramework::RenderSettingsMenu()
 	RECT rcClient;
 	::GetClientRect(m_hWnd, &rcClient);
 
+	int width = rcClient.right - rcClient.left;
+	int height = rcClient.bottom - rcClient.top;
+
 	RenderMenuBackground();
 
-	DrawCenteredText(rcClient, _T("SETTINGS"), 80, 48, RGB(255, 255, 255), true);
+	int titleY = height / 6;
+	int subtitleY = titleY + height / 10;
 
-	DrawSettingItem(_T("SOUND"), m_SoundOn ? _T("ON") : _T("OFF"), 230, (m_SettingMenuIdx == 0));
-	DrawSettingItem(_T("FULLSCREEN"), m_Fullscreen ? _T("ON") : _T("OFF"), 280, (m_SettingMenuIdx == 1));
-	DrawSettingItem(_T("BACK"), _T("START MENU"), 330, (m_SettingMenuIdx == 2));
+	int itemBaseY = height / 2 - height / 10;
+	int itemGap = max(45, height / 9);
 
-	DrawCenteredText(rcClient, _T("방향키 : 이동 / 좌우 : 변경 / ESC : 메뉴로"), 410, 18, RGB(170, 170, 170), false);
+	int guideY = height - height / 8;
+
+	int titleSize = max(30, height / 13);
+	int subSize = max(16, height / 30);
+	int guideSize = max(14, height / 40);
+
+	DrawCenteredText(rcClient, _T("SETTINGS"), titleY, titleSize, RGB(255, 255, 255), true);
+
+	DrawSettingItem(_T("SOUND"), m_SoundOn ? _T("ON") : _T("OFF"), itemBaseY, (m_SettingMenuIdx == 0));
+	DrawSettingItem(_T("FULLSCREEN"), m_Fullscreen ? _T("ON") : _T("OFF"), itemBaseY + itemGap, (m_SettingMenuIdx == 1));
+	DrawSettingItem(_T("BACK"), _T("START MENU"), itemBaseY + itemGap * 2, (m_SettingMenuIdx == 2));
+
+	DrawCenteredText(rcClient, _T("방향키 : 이동 / 좌우 or ENTER : 변경 / ESC : 메뉴로"), guideY, guideSize, RGB(170, 170, 170), false);
 }
 
 void CGameFramework::ExecuteStartMenu()
@@ -450,6 +558,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			break;
 		case VK_LEFT:
 		case VK_RIGHT:
+		case VK_RETURN:
 			ExecuteSettingsMenu();
 			break;
 		case VK_ESCAPE:
@@ -541,6 +650,7 @@ void CGameFramework::OnDestroy()
 	if (m_hDCFrameBuffer) ::DeleteDC(m_hDCFrameBuffer);
 
 	if (m_hWnd) DestroyWindow(m_hWnd);
+	if (m_hLoadingBitmap) ::DeleteObject(m_hLoadingBitmap);
 }
 
 void CGameFramework::ProcessInput()
