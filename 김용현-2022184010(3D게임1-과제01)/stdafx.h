@@ -46,6 +46,7 @@ using namespace DirectX;
 using namespace DirectX::PackedVector;
 
 #pragma comment(lib, "d3d12.lib")
+#pragma comment(lib, "winmm.lib")
 
 #define CLIENT_WIDTH			640
 #define CLIENT_HEIGHT			480

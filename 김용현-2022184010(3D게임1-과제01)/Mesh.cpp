@@ -51,33 +51,61 @@ void CMesh::SetPolygon(int nIndex, std::unique_ptr<CPolygon> pPolygon)
 	}
 }
 
-void CMesh::Render(HDC hDCFrameBuffer, XMFLOAT4X4& xmf4x4World, CCamera *pCamera)
+void CMesh::Render(HDC hDCFrameBuffer, XMFLOAT4X4& xmf4x4World, CCamera* pCamera)
 {
 	XMFLOAT4X4 xmf4x4Transform = Matrix4x4::Multiply(xmf4x4World, pCamera->m_xmf4x4ViewProject);
+
 	for (int j = 0; j < m_nPolygons; j++)
 	{
 		int nVertices = m_ppPolygons[j]->m_nVertices;
-		CVertex *pVertices = m_ppPolygons[j]->m_pVertices.get();
-		XMFLOAT3 xmf3Previous(-1.0f, 0.0f, 0.0f);
-		for (int i = 0; i <= nVertices; i++)
-		{
-			CVertex vertex = pVertices[i % nVertices];
-			//World/View/Projection Transformation(Perspective Divide)
-			XMFLOAT3 xmf3Current = Vector3::TransformCoord(vertex.m_xmf3Position, xmf4x4Transform);
-			if ((xmf3Current.z >= 0.0f) && (xmf3Current.z <= 1.0f))
-			{
-				//Screen Transformation
-				xmf3Current.x = +xmf3Current.x * (pCamera->m_d3dViewport.Width * 0.5f) + pCamera->m_d3dViewport.TopLeftX + (pCamera->m_d3dViewport.Width * 0.5f);
-				xmf3Current.y = -xmf3Current.y * (pCamera->m_d3dViewport.Height * 0.5f) + pCamera->m_d3dViewport.TopLeftY + (pCamera->m_d3dViewport.Height * 0.5f);
+		CVertex* pVertices = m_ppPolygons[j]->m_pVertices.get();
 
-				if (xmf3Previous.x >= 0.0f)
-				{
-					::MoveToEx(hDCFrameBuffer, (long)xmf3Previous.x, (long)xmf3Previous.y, NULL);
-					::LineTo(hDCFrameBuffer, (long)xmf3Current.x, (long)xmf3Current.y);
-				}
-				xmf3Previous = xmf3Current;
+		if (nVertices < 3) continue;
+
+		POINT pts[16];
+		XMFLOAT3 projected[16];
+
+		bool bVisible = true;
+
+		for (int i = 0; i < nVertices; i++)
+		{
+			XMFLOAT3 v = Vector3::TransformCoord(pVertices[i].m_xmf3Position, xmf4x4Transform);
+
+			// 간단 클리핑
+			if (v.z < 0.0f || v.z > 1.0f)
+			{
+				bVisible = false;
+				break;
 			}
+
+			v.x = +v.x * (pCamera->m_d3dViewport.Width * 0.5f)
+				+ pCamera->m_d3dViewport.TopLeftX
+				+ (pCamera->m_d3dViewport.Width * 0.5f);
+
+			v.y = -v.y * (pCamera->m_d3dViewport.Height * 0.5f)
+				+ pCamera->m_d3dViewport.TopLeftY
+				+ (pCamera->m_d3dViewport.Height * 0.5f);
+
+			projected[i] = v;
+
+			pts[i].x = (LONG)v.x;
+			pts[i].y = (LONG)v.y;
 		}
+
+		if (!bVisible) continue;
+
+		// 백페이스 컬링
+		float x1 = projected[1].x - projected[0].x;
+		float y1 = projected[1].y - projected[0].y;
+		float x2 = projected[2].x - projected[0].x;
+		float y2 = projected[2].y - projected[0].y;
+
+		float fCross = x1 * y2 - y1 * x2;
+
+		// 안보이는 면 제거 (필요하면 부호 바꿔)
+		if (fCross >= 0.0f) continue;
+
+		::Polygon(hDCFrameBuffer, pts, nVertices);
 	}
 }
 

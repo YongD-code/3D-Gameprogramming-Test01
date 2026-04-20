@@ -161,16 +161,24 @@ void CGameObject::Animate(float fElapsedTime)
 	UpdateBoundingBox();
 }
 
-void CGameObject::Render(HDC hDCFrameBuffer, CCamera *pCamera)
+void CGameObject::Render(HDC hDCFrameBuffer, CCamera* pCamera)
 {
 	if (m_pMesh)
 	{
 		if (pCamera->IsInFrustum(m_xmOOBB))
 		{
-			HPEN hPen = ::CreatePen(PS_SOLID, 0, m_dwColor);
+			HPEN hPen = ::CreatePen(PS_SOLID, 1, m_dwColor);
+			HBRUSH hBrush = ::CreateSolidBrush(m_dwColor);
+
 			HPEN hOldPen = (HPEN)::SelectObject(hDCFrameBuffer, hPen);
+			HBRUSH hOldBrush = (HBRUSH)::SelectObject(hDCFrameBuffer, hBrush);
+
 			m_pMesh->Render(hDCFrameBuffer, m_xmf4x4World, pCamera);
+
+			::SelectObject(hDCFrameBuffer, hOldBrush);
 			::SelectObject(hDCFrameBuffer, hOldPen);
+
+			::DeleteObject(hBrush);
 			::DeleteObject(hPen);
 		}
 	}
@@ -257,7 +265,7 @@ void CExplosiveObject::Animate(float fElapsedTime)
 	}
 }
 
-void CExplosiveObject::Render(HDC hDCFrameBuffer, CCamera *pCamera)
+void CExplosiveObject::Render(HDC hDCFrameBuffer, CCamera* pCamera)
 {
 	if (m_bBlowingUp)
 	{
@@ -265,10 +273,18 @@ void CExplosiveObject::Render(HDC hDCFrameBuffer, CCamera *pCamera)
 		{
 			if (m_pExplosionMesh)
 			{
-				HPEN hPen = ::CreatePen(PS_SOLID, 0, m_dwColor);
+				HPEN hPen = ::CreatePen(PS_SOLID, 1, m_dwColor);
+				HBRUSH hBrush = ::CreateSolidBrush(m_dwColor);
+
 				HPEN hOldPen = (HPEN)::SelectObject(hDCFrameBuffer, hPen);
+				HBRUSH hOldBrush = (HBRUSH)::SelectObject(hDCFrameBuffer, hBrush);
+
 				m_pExplosionMesh->Render(hDCFrameBuffer, m_pxmf4x4Transforms[i], pCamera);
+
+				::SelectObject(hDCFrameBuffer, hOldBrush);
 				::SelectObject(hDCFrameBuffer, hOldPen);
+
+				::DeleteObject(hBrush);
 				::DeleteObject(hPen);
 			}
 		}

@@ -7,6 +7,8 @@
 #include "Timer.h"
 #include "Scene.h"
 #include "Player.h"
+#include "Sound.h"
+
 
 enum class GAMESTATE
 {
@@ -58,10 +60,11 @@ private:
 	RECT							m_rcWindowed = {};
 	DWORD							m_dwWindowStyle = WS_OVERLAPPEDWINDOW;
 
-	//메뉴, 로딩, 배경 비트맵 후에 추가 예정
 	HBITMAP							m_hMenuBitmap = NULL;
 	HBITMAP							m_hLoadingBitmap = NULL;
 	HBITMAP							m_hSkyBitmap = NULL;
+
+	CSound							m_Sound;
 
 public:
 	void BuildFrameBuffer();

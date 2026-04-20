@@ -34,6 +34,7 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 	m_hLoadingBitmap = (HBITMAP)::LoadImage(m_hInstance, MAKEINTRESOURCE(IDB_BITMAP1),IMAGE_BITMAP,0, 0,LR_CREATEDIBSECTION);
 	m_hMenuBitmap = (HBITMAP)::LoadImage(m_hInstance, MAKEINTRESOURCE(IDB_BITMAP2), IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION);
 
+	m_Sound.SetSoundOn(true);
 
 	return(true);
 }
@@ -116,16 +117,27 @@ void CGameFramework::ChangeState(GAMESTATE eState)
 	{
 	case GAMESTATE::LOADING:
 		m_Loading = 0.0f;
+		m_Sound.StopBGM();
+		m_Sound.PlayBGM(_T("loading.wav"));
 		break;
+
 	case GAMESTATE::STARTMENU:
 		m_StartMenuIdx = 0;
+		m_Sound.StopBGM();
+		m_Sound.PlayBGM(_T("menu.wav"));
 		break;
+
 	case GAMESTATE::SETTINGS:
 		m_SettingMenuIdx = 0;
 		break;
+
 	case GAMESTATE::INGAME:
+		m_Sound.StopBGM();
+		m_Sound.PlayBGM(_T("game.wav"));
 		break;
+
 	case GAMESTATE::EXIT:
+		m_Sound.StopBGM();
 		::PostQuitMessage(0);
 		break;
 	}
@@ -487,10 +499,24 @@ void CGameFramework::ExecuteSettingsMenu()
 	{
 	case 0:
 		m_SoundOn = !m_SoundOn;
+		m_Sound.SetSoundOn(m_SoundOn);
+
+		if (m_SoundOn)
+		{
+			if (m_eGameState == GAMESTATE::STARTMENU || m_eGameState == GAMESTATE::SETTINGS)
+				m_Sound.PlayBGM(_T("menu.wav"));
+			else if (m_eGameState == GAMESTATE::LOADING)
+				m_Sound.PlayBGM(_T("loading.wav"));
+
+			else if (m_eGameState == GAMESTATE::INGAME)
+				m_Sound.PlayBGM(_T("game.wav"));
+		}
 		break;
+
 	case 1:
 		ToggleFullscreen();
 		break;
+
 	case 2:
 		ChangeState(GAMESTATE::STARTMENU);
 		break;
@@ -658,6 +684,7 @@ void CGameFramework::OnDestroy()
 
 	if (m_hWnd) DestroyWindow(m_hWnd);
 	if (m_hLoadingBitmap) ::DeleteObject(m_hLoadingBitmap);
+	m_Sound.StopBGM();
 }
 
 void CGameFramework::ProcessInput()
