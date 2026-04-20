@@ -167,19 +167,7 @@ void CGameObject::Render(HDC hDCFrameBuffer, CCamera* pCamera)
 	{
 		if (pCamera->IsInFrustum(m_xmOOBB))
 		{
-			HPEN hPen = ::CreatePen(PS_SOLID, 1, RGB(20, 20, 20));
-			HBRUSH hBrush = ::CreateSolidBrush(m_dwColor);
-
-			HPEN hOldPen = (HPEN)::SelectObject(hDCFrameBuffer, hPen);
-			HBRUSH hOldBrush = (HBRUSH)::SelectObject(hDCFrameBuffer, hBrush);
-
-			m_pMesh->Render(hDCFrameBuffer, m_xmf4x4World, pCamera);
-
-			::SelectObject(hDCFrameBuffer, hOldBrush);
-			::SelectObject(hDCFrameBuffer, hOldPen);
-
-			::DeleteObject(hBrush);
-			::DeleteObject(hPen);
+			m_pMesh->Render(hDCFrameBuffer, m_xmf4x4World, pCamera, m_dwColor);
 		}
 	}
 }
@@ -279,7 +267,7 @@ void CExplosiveObject::Render(HDC hDCFrameBuffer, CCamera* pCamera)
 				HPEN hOldPen = (HPEN)::SelectObject(hDCFrameBuffer, hPen);
 				HBRUSH hOldBrush = (HBRUSH)::SelectObject(hDCFrameBuffer, hBrush);
 
-				m_pExplosionMesh->Render(hDCFrameBuffer, m_pxmf4x4Transforms[i], pCamera);
+				m_pExplosionMesh->Render(hDCFrameBuffer, m_pxmf4x4Transforms[i], pCamera, m_dwColor);
 
 				::SelectObject(hDCFrameBuffer, hOldBrush);
 				::SelectObject(hDCFrameBuffer, hOldPen);

@@ -66,7 +66,7 @@ void CScene::BuildObjects()
 	m_pWallsObject = std::make_unique<CWallsObject>();
 	m_pWallsObject->SetPosition(0.0f, 0.0f, 0.0f);
 	m_pWallsObject->SetMesh(pWallCubeMesh);
-	m_pWallsObject->SetColor(RGB(0, 128, 255));
+	m_pWallsObject->SetColor(RGB(130, 218, 255));
 	m_pWallsObject->m_pxmf4WallPlanes[0] = XMFLOAT4(+1.0f, 0.0f, 0.0f, fHalfWidth);
 	m_pWallsObject->m_pxmf4WallPlanes[1] = XMFLOAT4(-1.0f, 0.0f, 0.0f, fHalfWidth);
 	m_pWallsObject->m_pxmf4WallPlanes[2] = XMFLOAT4(0.0f, +1.0f, 0.0f, fHalfHeight);

@@ -51,10 +51,23 @@ void CMesh::SetPolygon(int nIndex, std::unique_ptr<CPolygon> pPolygon)
 	}
 }
 
-void CMesh::Render(HDC hDCFrameBuffer, XMFLOAT4X4& xmf4x4World, CCamera* pCamera)
+static COLORREF ApplyLighting(COLORREF baseColor, float intensity)
+{
+	intensity = max(0.2f, min(intensity, 1.0f));
+
+	int r = int(GetRValue(baseColor) * intensity);
+	int g = int(GetGValue(baseColor) * intensity);
+	int b = int(GetBValue(baseColor) * intensity);
+
+	return RGB(r, g, b);
+}
+
+void CMesh::Render(HDC hDCFrameBuffer, XMFLOAT4X4& xmf4x4World, CCamera* pCamera, COLORREF dwBaseColor)
 {
 	XMFLOAT4X4 xmf4x4WorldView = Matrix4x4::Multiply(xmf4x4World, pCamera->m_xmf4x4View);
 	XMFLOAT4X4 xmf4x4Transform = Matrix4x4::Multiply(xmf4x4WorldView, pCamera->m_xmf4x4Projection);
+
+	XMFLOAT3 lightDir = Vector3::Normalize(XMFLOAT3(-0.4f, 0.7f, -0.6f));
 
 	for (int j = 0; j < m_nPolygons; j++)
 	{
@@ -92,17 +105,34 @@ void CMesh::Render(HDC hDCFrameBuffer, XMFLOAT4X4& xmf4x4World, CCamera* pCamera
 		}
 
 		if (!bVisible) continue;
+
 		XMFLOAT3 e1 = Vector3::Subtract(viewVertices[1], viewVertices[0]);
 		XMFLOAT3 e2 = Vector3::Subtract(viewVertices[2], viewVertices[0]);
 		XMFLOAT3 normal = Vector3::CrossProduct(e1, e2, true);
 
 		XMFLOAT3 toCamera = Vector3::ScalarProduct(viewVertices[0], -1.0f, false);
-
 		float fDotProduct = Vector3::DotProduct(normal, toCamera);
 
 		if (fDotProduct <= 0.0f) continue;
 
+		float NdotL = Vector3::DotProduct(normal, lightDir);
+		float intensity = 0.25f + max(0.0f, NdotL) * 0.75f;
+
+		COLORREF litColor = ApplyLighting(dwBaseColor, intensity);
+
+		HPEN hPen = ::CreatePen(PS_SOLID, 1, RGB(20, 20, 20));
+		HBRUSH hBrush = ::CreateSolidBrush(litColor);
+
+		HPEN hOldPen = (HPEN)::SelectObject(hDCFrameBuffer, hPen);
+		HBRUSH hOldBrush = (HBRUSH)::SelectObject(hDCFrameBuffer, hBrush);
+
 		::Polygon(hDCFrameBuffer, pts, nVertices);
+
+		::SelectObject(hDCFrameBuffer, hOldBrush);
+		::SelectObject(hDCFrameBuffer, hOldPen);
+
+		::DeleteObject(hBrush);
+		::DeleteObject(hPen);
 	}
 }
 
@@ -299,7 +329,7 @@ CWallMesh::~CWallMesh(void)
 {
 }
 
-void CWallMesh::Render(HDC hDCFrameBuffer, XMFLOAT4X4& xmf4x4World, CCamera* pCamera)
+void CWallMesh::Render(HDC hDCFrameBuffer, XMFLOAT4X4& xmf4x4World, CCamera* pCamera, COLORREF dwBaseColor)
 {
 	XMFLOAT4X4 xmf4x4Transform = Matrix4x4::Multiply(xmf4x4World, pCamera->m_xmf4x4ViewProject);
 
@@ -337,7 +367,19 @@ void CWallMesh::Render(HDC hDCFrameBuffer, XMFLOAT4X4& xmf4x4World, CCamera* pCa
 
 		if (!bVisible) continue;
 
+		HPEN hPen = ::CreatePen(PS_SOLID, 1, RGB(20, 20, 20));
+		HBRUSH hBrush = ::CreateSolidBrush(dwBaseColor);
+
+		HPEN hOldPen = (HPEN)::SelectObject(hDCFrameBuffer, hPen);
+		HBRUSH hOldBrush = (HBRUSH)::SelectObject(hDCFrameBuffer, hBrush);
+
 		::Polygon(hDCFrameBuffer, pts, nVertices);
+
+		::SelectObject(hDCFrameBuffer, hOldBrush);
+		::SelectObject(hDCFrameBuffer, hOldPen);
+
+		::DeleteObject(hBrush);
+		::DeleteObject(hPen);
 	}
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////
