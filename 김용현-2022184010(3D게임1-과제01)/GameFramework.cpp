@@ -611,6 +611,9 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		case VK_SPACE:
 			static_cast<CAirplanePlayer*>(m_pPlayer.get())->FireBullet(m_pSelectedObject);
 			break;
+		case 'V':
+			m_pPlayer->ChangeCameraMode();
+			break;
 		default:
 			m_pScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
 			break;

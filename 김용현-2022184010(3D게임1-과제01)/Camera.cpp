@@ -128,16 +128,26 @@ void CCamera::Update(CPlayer *pPlayer, XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 	XMFLOAT3 xmf3Position = Vector3::Add(pPlayer->m_xmf3Position, xmf3Offset);
 	XMFLOAT3 xmf3Direction = Vector3::Subtract(xmf3Position, m_xmf3Position);
 	float fLength = Vector3::Length(xmf3Direction);
-	xmf3Direction = Vector3::Normalize(xmf3Direction);
 
-	float fTimeLagScale = fTimeElapsed * (1.0f / 0.25f);
-	float fDistance = fLength * fTimeLagScale;
-	if (fDistance > fLength) fDistance = fLength;
-	if (fLength < 0.01f) fDistance = fLength;
-	if (fDistance > 0)
+	if (fLength > 0.0001f)
 	{
+		xmf3Direction = Vector3::Normalize(xmf3Direction);
+
+		float fTimeLagScale = fTimeElapsed * (1.0f / 0.25f);
+		float fDistance = fLength * fTimeLagScale;
+		if (fDistance > fLength) fDistance = fLength;
+		if (fLength < 0.01f) fDistance = fLength;
+
 		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Direction, fDistance);
+	}
+
+	if (pPlayer->m_eCameraMode == CAMERAMODE::FIRSTPERSON)
+	{
+		XMFLOAT3 xmf3LookAt = Vector3::Add(m_xmf3Position, pPlayer->m_xmf3Look, 100.0f);
+		SetLookAt(xmf3LookAt, pPlayer->m_xmf3Up);
+	}
+	else
+	{
 		SetLookAt(pPlayer->m_xmf3Position, pPlayer->m_xmf3Up);
 	}
 }
-

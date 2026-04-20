@@ -4,6 +4,9 @@
 #include <memory>
 #include <array>
 
+enum class CAMERAMODE { FIRSTPERSON, THIRDPERSON };
+
+
 class CPlayer : public CGameObject
 {
 public:
@@ -33,7 +36,11 @@ public:
 	void Move(float x, float y, float z);
 	void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f);
 	void SetCameraOffset(const XMFLOAT3& xmf3CameraOffset);
-	void Update(float fTimeElapsed=0.016f);
+	void Update(float fTimeElapsed = 0.016f);
+
+	CAMERAMODE m_eCameraMode = CAMERAMODE::THIRDPERSON;
+	void ChangeCameraMode();
+	void ApplyCameraMode();
 
 	virtual void OnUpdateTransform();
 	virtual void Animate(float fElapsedTime);

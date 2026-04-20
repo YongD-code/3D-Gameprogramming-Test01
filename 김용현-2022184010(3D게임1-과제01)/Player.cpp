@@ -15,6 +15,9 @@ CPlayer::CPlayer()
 
 	m_xmf3CameraOffset = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
+
+	m_eCameraMode = CAMERAMODE::THIRDPERSON;
+	ApplyCameraMode();
 }
 
 CPlayer::~CPlayer()
@@ -118,6 +121,35 @@ void CPlayer::Update(float fTimeElapsed)
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3Deceleration, fDeceleration);
 }
 
+void CPlayer::ApplyCameraMode()
+{
+	switch (m_eCameraMode)
+	{
+	case CAMERAMODE::FIRSTPERSON:
+		m_xmf3CameraOffset = XMFLOAT3(0.0f, 1.5f, 2.0f);
+		break;
+	case CAMERAMODE::THIRDPERSON:
+		m_xmf3CameraOffset = XMFLOAT3(0.0f, 5.0f, -15.0f);
+		break;
+	}
+}
+
+void CPlayer::ChangeCameraMode()
+{
+	switch (m_eCameraMode)
+	{
+	case CAMERAMODE::FIRSTPERSON:
+		m_eCameraMode = CAMERAMODE::THIRDPERSON;
+		break;
+
+	case CAMERAMODE::THIRDPERSON:
+		m_eCameraMode = CAMERAMODE::FIRSTPERSON;
+		break;
+	}
+	ApplyCameraMode();
+}
+
+
 void CPlayer::Animate(float fElapsedTime)
 {
 	OnUpdateTransform();
@@ -176,7 +208,10 @@ void CAirplanePlayer::OnUpdateTransform()
 
 void CAirplanePlayer::Render(HDC hDCFrameBuffer, CCamera *pCamera)
 {
-	CPlayer::Render(hDCFrameBuffer, pCamera);
+	if (m_eCameraMode != CAMERAMODE::FIRSTPERSON)
+	{
+		CPlayer::Render(hDCFrameBuffer, pCamera);
+	}
 
 	for (auto& bullet : m_ppBullets)
 	{
