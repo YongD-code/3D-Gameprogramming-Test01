@@ -693,7 +693,7 @@ void CGameFramework::ProcessInput()
 
 	static UCHAR pKeyBuffer[256];
 	DWORD dwDirection = 0;
-
+	float fRollDelta = 0.0f;
 	if (GetKeyboardState(pKeyBuffer))
 	{
 		if (pKeyBuffer['W'] & 0xF0) dwDirection |= DIR_FORWARD;
@@ -702,6 +702,8 @@ void CGameFramework::ProcessInput()
 		if (pKeyBuffer['D'] & 0xF0) dwDirection |= DIR_RIGHT;
 		if (pKeyBuffer['Z'] & 0xF0) dwDirection |= DIR_UP;
 		if (pKeyBuffer['C'] & 0xF0) dwDirection |= DIR_DOWN;
+		if (pKeyBuffer['E'] & 0xF0) fRollDelta -= 2.0f; 
+		if (pKeyBuffer['Q'] & 0xF0) fRollDelta += 2.0f; 
 	}
 
 	float cxDelta = 0.0f, cyDelta = 0.0f;
@@ -716,6 +718,9 @@ void CGameFramework::ProcessInput()
 		SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 	}
 
+	float fMovespeed = 0.15f;
+	if (pKeyBuffer[VK_SHIFT] & 0xF0) fMovespeed = 0.3f;
+
 	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 	{
 		if (cxDelta || cyDelta)
@@ -725,7 +730,8 @@ void CGameFramework::ProcessInput()
 			else
 				m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 		}
-		if (dwDirection) m_pPlayer->Move(dwDirection, 0.15f);
+		if (fRollDelta != 0.0f) m_pPlayer->Rotate(0.0f, 0.0f, fRollDelta);
+		if (dwDirection) m_pPlayer->Move(dwDirection, fMovespeed);
 	}
 
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());

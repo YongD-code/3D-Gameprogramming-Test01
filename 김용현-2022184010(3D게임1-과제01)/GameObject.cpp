@@ -167,7 +167,7 @@ void CGameObject::Render(HDC hDCFrameBuffer, CCamera* pCamera)
 	{
 		if (pCamera->IsInFrustum(m_xmOOBB))
 		{
-			HPEN hPen = ::CreatePen(PS_SOLID, 1, m_dwColor);
+			HPEN hPen = ::CreatePen(PS_SOLID, 1, RGB(20, 20, 20));
 			HBRUSH hBrush = ::CreateSolidBrush(m_dwColor);
 
 			HPEN hOldPen = (HPEN)::SelectObject(hDCFrameBuffer, hPen);

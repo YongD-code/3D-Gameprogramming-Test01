@@ -53,7 +53,8 @@ void CMesh::SetPolygon(int nIndex, std::unique_ptr<CPolygon> pPolygon)
 
 void CMesh::Render(HDC hDCFrameBuffer, XMFLOAT4X4& xmf4x4World, CCamera* pCamera)
 {
-	XMFLOAT4X4 xmf4x4Transform = Matrix4x4::Multiply(xmf4x4World, pCamera->m_xmf4x4ViewProject);
+	XMFLOAT4X4 xmf4x4WorldView = Matrix4x4::Multiply(xmf4x4World, pCamera->m_xmf4x4View);
+	XMFLOAT4X4 xmf4x4Transform = Matrix4x4::Multiply(xmf4x4WorldView, pCamera->m_xmf4x4Projection);
 
 	for (int j = 0; j < m_nPolygons; j++)
 	{
@@ -62,16 +63,16 @@ void CMesh::Render(HDC hDCFrameBuffer, XMFLOAT4X4& xmf4x4World, CCamera* pCamera
 
 		if (nVertices < 3) continue;
 
+		XMFLOAT3 viewVertices[16];
 		POINT pts[16];
-		XMFLOAT3 projected[16];
-
 		bool bVisible = true;
 
 		for (int i = 0; i < nVertices; i++)
 		{
+			viewVertices[i] = Vector3::TransformCoord(pVertices[i].m_xmf3Position, xmf4x4WorldView);
+
 			XMFLOAT3 v = Vector3::TransformCoord(pVertices[i].m_xmf3Position, xmf4x4Transform);
 
-			// 간단 클리핑
 			if (v.z < 0.0f || v.z > 1.0f)
 			{
 				bVisible = false;
@@ -86,24 +87,20 @@ void CMesh::Render(HDC hDCFrameBuffer, XMFLOAT4X4& xmf4x4World, CCamera* pCamera
 				+ pCamera->m_d3dViewport.TopLeftY
 				+ (pCamera->m_d3dViewport.Height * 0.5f);
 
-			projected[i] = v;
-
 			pts[i].x = (LONG)v.x;
 			pts[i].y = (LONG)v.y;
 		}
 
 		if (!bVisible) continue;
+		XMFLOAT3 e1 = Vector3::Subtract(viewVertices[1], viewVertices[0]);
+		XMFLOAT3 e2 = Vector3::Subtract(viewVertices[2], viewVertices[0]);
+		XMFLOAT3 normal = Vector3::CrossProduct(e1, e2, true);
 
-		// 백페이스 컬링
-		float x1 = projected[1].x - projected[0].x;
-		float y1 = projected[1].y - projected[0].y;
-		float x2 = projected[2].x - projected[0].x;
-		float y2 = projected[2].y - projected[0].y;
+		XMFLOAT3 toCamera = Vector3::ScalarProduct(viewVertices[0], -1.0f, false);
 
-		float fCross = x1 * y2 - y1 * x2;
+		float fDotProduct = Vector3::DotProduct(normal, toCamera);
 
-		// 안보이는 면 제거 (필요하면 부호 바꿔)
-		if (fCross >= 0.0f) continue;
+		if (fDotProduct <= 0.0f) continue;
 
 		::Polygon(hDCFrameBuffer, pts, nVertices);
 	}
@@ -302,6 +299,47 @@ CWallMesh::~CWallMesh(void)
 {
 }
 
+void CWallMesh::Render(HDC hDCFrameBuffer, XMFLOAT4X4& xmf4x4World, CCamera* pCamera)
+{
+	XMFLOAT4X4 xmf4x4Transform = Matrix4x4::Multiply(xmf4x4World, pCamera->m_xmf4x4ViewProject);
+
+	for (int j = 0; j < m_nPolygons; j++)
+	{
+		int nVertices = m_ppPolygons[j]->m_nVertices;
+		CVertex* pVertices = m_ppPolygons[j]->m_pVertices.get();
+
+		if (nVertices < 3) continue;
+
+		POINT pts[16];
+		bool bVisible = true;
+
+		for (int i = 0; i < nVertices; i++)
+		{
+			XMFLOAT3 v = Vector3::TransformCoord(pVertices[i].m_xmf3Position, xmf4x4Transform);
+
+			if (v.z < 0.0f || v.z > 1.0f)
+			{
+				bVisible = false;
+				break;
+			}
+
+			v.x = +v.x * (pCamera->m_d3dViewport.Width * 0.5f)
+				+ pCamera->m_d3dViewport.TopLeftX
+				+ (pCamera->m_d3dViewport.Width * 0.5f);
+
+			v.y = -v.y * (pCamera->m_d3dViewport.Height * 0.5f)
+				+ pCamera->m_d3dViewport.TopLeftY
+				+ (pCamera->m_d3dViewport.Height * 0.5f);
+
+			pts[i].x = (LONG)v.x;
+			pts[i].y = (LONG)v.y;
+		}
+
+		if (!bVisible) continue;
+
+		::Polygon(hDCFrameBuffer, pts, nVertices);
+	}
+}
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 CAirplaneMesh::CAirplaneMesh(float fWidth, float fHeight, float fDepth) : CMesh(24)
