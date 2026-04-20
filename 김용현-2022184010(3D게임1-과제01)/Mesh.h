@@ -47,7 +47,7 @@ public:
 
 public:
 	void SetPolygon(int nIndex, std::unique_ptr<CPolygon> pPolygon);
-	virtual void Render(HDC hDCFrameBuffer, XMFLOAT4X4& xmf4x4World, CCamera *pCamera, COLORREF dwBaseColor);
+	virtual void Render(HDC hDCFrameBuffer, XMFLOAT4X4& xmf4x4World, CCamera *pCamera, COLORREF dwBaseColor, bool bSelected);
 
 	BOOL RayIntersectionByTriangle(XMVECTOR& xmRayOrigin, XMVECTOR& xmRayDirection, XMVECTOR v0, XMVECTOR v1, XMVECTOR v2, float *pfNearHitDistance);
 	int CheckRayIntersection(XMVECTOR& xmvPickRayOrigin, XMVECTOR& xmvPickRayDirection, float *pfNearHitDistance);
@@ -65,7 +65,7 @@ class CWallMesh : public CMesh
 public:
 	CWallMesh(float fWidth = 4.0f, float fHeight = 4.0f, float fDepth = 4.0f, int nSubRects = 20);
 	virtual ~CWallMesh();
-	virtual void Render(HDC hDCFrameBuffer, XMFLOAT4X4& xmf4x4World, CCamera* pCamera, COLORREF dwBaseColor) override;
+	virtual void Render(HDC hDCFrameBuffer, XMFLOAT4X4& xmf4x4World, CCamera* pCamera, COLORREF dwBaseColor, bool bSelected) override;
 };
 
 class CAirplaneMesh : public CMesh

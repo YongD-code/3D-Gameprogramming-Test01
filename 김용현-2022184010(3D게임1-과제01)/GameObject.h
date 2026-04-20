@@ -23,6 +23,8 @@ public:
 	CGameObject					*m_pObjectCollided = NULL;
 
 	DWORD						m_dwColor;
+	DWORD						m_dwBaseColor;
+	bool						m_bSelected = false;
 
 	XMFLOAT3					m_xmf3MovingDirection;
 	float						m_fMovingSpeed;
@@ -35,6 +37,8 @@ public:
 	void SetActive(bool bActive) { m_bActive = bActive; }
 	void SetMesh(CMesh *pMesh) { m_pMesh = pMesh; if (pMesh) pMesh->AddRef(); }
 	void SetColor(DWORD dwColor) { m_dwColor = dwColor; }
+	void SetBaseColor(DWORD dwColor) { m_dwBaseColor = dwColor; }
+	void SetSelected(bool bSelected) { m_bSelected = bSelected; }
 	void SetPosition(float x, float y, float z);
 	void SetPosition(XMFLOAT3& xmf3Position);
 

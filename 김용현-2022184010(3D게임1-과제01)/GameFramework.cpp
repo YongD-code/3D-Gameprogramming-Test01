@@ -530,7 +530,9 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	switch (nMessageID)
 	{
 	case WM_RBUTTONDOWN:
+		if (m_pSelectedObject) m_pSelectedObject->SetSelected(false);
 		m_pSelectedObject = m_pScene->PickObjectPointedByCursor(LOWORD(lParam), HIWORD(lParam), m_pPlayer->m_pCamera.get());
+		if (m_pSelectedObject) m_pSelectedObject->SetSelected(true);
 		break;
 	case WM_LBUTTONDOWN:
 		::SetCapture(hWnd);
@@ -783,6 +785,16 @@ void CGameFramework::FrameAdvance()
 
 		m_GameTimer.GetFrameRate(m_pszFrameRate + 27, 22);
 		::SetWindowText(m_hWnd, m_pszFrameRate);
+
+		if (m_pSelectedObject)
+		{
+			CExplosiveObject* pExplosiveObject = static_cast<CExplosiveObject*>(m_pSelectedObject);
+			if (pExplosiveObject->m_bBlowingUp)
+			{
+				m_pSelectedObject->SetSelected(false);
+				m_pSelectedObject = NULL;
+			}
+		}
 		break;
 
 	case GAMESTATE::EXIT:

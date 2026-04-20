@@ -207,6 +207,9 @@ CGameObject *CScene::PickObjectPointedByCursor(int xClient, int yClient, CCamera
 
 	for (auto& object : m_ppObjects)
 	{
+		CExplosiveObject* pExplosiveObject = static_cast<CExplosiveObject*>(object.get());
+		if (pExplosiveObject->m_bBlowingUp) continue;
+
 		float fHitDistance = FLT_MAX;
 		nIntersected = object->PickObjectByRayIntersection(xmvPickPosition, xmmtxView, &fHitDistance);
 		if ((nIntersected > 0) && (fHitDistance < fNearestHitDistance))

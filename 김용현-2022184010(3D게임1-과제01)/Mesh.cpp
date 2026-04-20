@@ -62,7 +62,7 @@ static COLORREF ApplyLighting(COLORREF baseColor, float intensity)
 	return RGB(r, g, b);
 }
 
-void CMesh::Render(HDC hDCFrameBuffer, XMFLOAT4X4& xmf4x4World, CCamera* pCamera, COLORREF dwBaseColor)
+void CMesh::Render(HDC hDCFrameBuffer, XMFLOAT4X4& xmf4x4World, CCamera* pCamera, COLORREF dwBaseColor, bool bSelected)
 {
 	XMFLOAT4X4 xmf4x4WorldView = Matrix4x4::Multiply(xmf4x4World, pCamera->m_xmf4x4View);
 	XMFLOAT4X4 xmf4x4Transform = Matrix4x4::Multiply(xmf4x4WorldView, pCamera->m_xmf4x4Projection);
@@ -120,7 +120,10 @@ void CMesh::Render(HDC hDCFrameBuffer, XMFLOAT4X4& xmf4x4World, CCamera* pCamera
 
 		COLORREF litColor = ApplyLighting(dwBaseColor, intensity);
 
-		HPEN hPen = ::CreatePen(PS_SOLID, 1, RGB(20, 20, 20));
+		COLORREF edgeColor = bSelected ? RGB(255, 255, 0) : RGB(20, 20, 20);
+		int edgeWidth = bSelected ? 2 : 1;
+
+		HPEN hPen = ::CreatePen(PS_SOLID, edgeWidth, edgeColor);
 		HBRUSH hBrush = ::CreateSolidBrush(litColor);
 
 		HPEN hOldPen = (HPEN)::SelectObject(hDCFrameBuffer, hPen);
@@ -329,7 +332,7 @@ CWallMesh::~CWallMesh(void)
 {
 }
 
-void CWallMesh::Render(HDC hDCFrameBuffer, XMFLOAT4X4& xmf4x4World, CCamera* pCamera, COLORREF dwBaseColor)
+void CWallMesh::Render(HDC hDCFrameBuffer, XMFLOAT4X4& xmf4x4World, CCamera* pCamera, COLORREF dwBaseColor, bool bSelected)
 {
 	XMFLOAT4X4 xmf4x4Transform = Matrix4x4::Multiply(xmf4x4World, pCamera->m_xmf4x4ViewProject);
 
