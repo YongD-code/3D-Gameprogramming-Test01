@@ -22,7 +22,7 @@ void CScene::BuildObjects()
 	CExplosiveObject::PrepareExplosion();
 
 	float fHalfWidth = 45.0f, fHalfHeight = 45.0f, fHalfDepth = 110.0f;
-	CWallMesh *pWallCubeMesh = new CWallMesh(fHalfWidth * 2.0f, fHalfHeight * 2.0f, fHalfDepth * 2.0f, 30);
+	CWallMesh *pWallCubeMesh = new CWallMesh(fHalfWidth * 2.0f, fHalfHeight * 2.0f, fHalfDepth * 2.0f, 12);
 
 	m_pWallsObject = std::make_unique<CWallsObject>();
 	m_pWallsObject->SetPosition(0.0f, 0.0f, 0.0f);

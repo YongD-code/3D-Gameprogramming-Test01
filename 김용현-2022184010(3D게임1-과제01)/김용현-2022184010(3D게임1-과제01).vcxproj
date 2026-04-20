@@ -157,6 +157,7 @@
   <ItemGroup>
     <Image Include="LoadingBitmap.bmp" />
     <Image Include="MenuBitmap.bmp" />
+    <Image Include="sky.bmp" />
     <Image Include="small.ico" />
     <Image Include="김용현-2022184010(3D게임1-과제01).ico" />
   </ItemGroup>

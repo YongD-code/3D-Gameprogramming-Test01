@@ -33,6 +33,7 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 
 	m_hLoadingBitmap = (HBITMAP)::LoadImage(m_hInstance, MAKEINTRESOURCE(IDB_BITMAP1),IMAGE_BITMAP,0, 0,LR_CREATEDIBSECTION);
 	m_hMenuBitmap = (HBITMAP)::LoadImage(m_hInstance, MAKEINTRESOURCE(IDB_BITMAP2), IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION);
+	m_hSkyBitmap = (HBITMAP)::LoadImage(m_hInstance, MAKEINTRESOURCE(IDB_BITMAP3), IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION);
 
 	m_Sound.SetSoundOn(true);
 
@@ -704,7 +705,9 @@ void CGameFramework::OnDestroy()
 	if (m_hDCFrameBuffer) ::DeleteDC(m_hDCFrameBuffer);
 
 	if (m_hWnd) DestroyWindow(m_hWnd);
+	if (m_hMenuBitmap) ::DeleteObject(m_hMenuBitmap);
 	if (m_hLoadingBitmap) ::DeleteObject(m_hLoadingBitmap);
+	if (m_hSkyBitmap) ::DeleteObject(m_hSkyBitmap);
 	m_Sound.StopBGM();
 }
 
