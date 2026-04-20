@@ -8,7 +8,7 @@
 #include "Scene.h"
 #include "Player.h"
 #include "Sound.h"
-
+#include <queue>
 
 enum class GAMESTATE
 {
@@ -17,6 +17,19 @@ enum class GAMESTATE
 	SETTINGS,
 	INGAME,
 	EXIT
+};
+
+enum class EVENTTYPE
+{
+	FIRE_BULLET,
+	EXPLODE_ONE,
+	EXPLODE_ALL
+};
+
+struct GameEvent
+{
+	EVENTTYPE eType;
+	int nObjectIndex = -1;
 };
 
 class CGameFramework
@@ -66,6 +79,8 @@ private:
 
 	CSound							m_Sound;
 
+	std::queue<GameEvent>			m_EventQueue;
+
 public:
 	void BuildFrameBuffer();
 	void ResizeFrameBuffer(int nWidth, int nHeight);
@@ -77,6 +92,7 @@ public:
 	void BuildObjects();
 	void ReleaseObjects();
 	void ProcessInput();
+	void ProcessEventQueue();
 
 	void OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);

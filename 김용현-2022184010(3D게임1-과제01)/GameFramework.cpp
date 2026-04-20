@@ -611,13 +611,29 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		case VK_RETURN:
 			break;
 		case VK_SPACE:
-			static_cast<CAirplanePlayer*>(m_pPlayer.get())->FireBullet(m_pSelectedObject);
+			m_EventQueue.push({ EVENTTYPE::FIRE_BULLET, -1 });
 			break;
 		case 'V':
 			m_pPlayer->ChangeCameraMode();
 			break;
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+		case '8':
+		case '9':
+		{
+			int index = int(wParam - '1');
+			m_EventQueue.push({ EVENTTYPE::EXPLODE_ONE, index });
+			break;
+		}
+		case 'B':
+			m_EventQueue.push({ EVENTTYPE::EXPLODE_ALL, -1 });
+			break;
 		default:
-			m_pScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
 			break;
 		}
 		break;
@@ -742,6 +758,48 @@ void CGameFramework::ProcessInput()
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
 }
 
+void CGameFramework::ProcessEventQueue()
+{
+	while (!m_EventQueue.empty())
+	{
+		GameEvent event = m_EventQueue.front();
+		m_EventQueue.pop();
+
+		switch (event.eType)
+		{
+		case EVENTTYPE::FIRE_BULLET:
+		{
+			static_cast<CAirplanePlayer*>(m_pPlayer.get())->FireBullet(m_pSelectedObject);
+			break;
+		}
+		case EVENTTYPE::EXPLODE_ONE:
+		{
+			if (m_pScene && event.nObjectIndex >= 0 &&
+				event.nObjectIndex < static_cast<int>(m_pScene->m_ppObjects.size()))
+			{
+				CExplosiveObject* pExplosiveObject =
+					static_cast<CExplosiveObject*>(m_pScene->m_ppObjects[event.nObjectIndex].get());
+				pExplosiveObject->m_bBlowingUp = true;
+			}
+			break;
+		}
+		case EVENTTYPE::EXPLODE_ALL:
+		{
+			if (m_pScene)
+			{
+				for (auto& object : m_pScene->m_ppObjects)
+				{
+					CExplosiveObject* pExplosiveObject =
+						static_cast<CExplosiveObject*>(object.get());
+					pExplosiveObject->m_bBlowingUp = true;
+				}
+			}
+			break;
+		}
+		}
+	}
+}
+
 void CGameFramework::FrameAdvance()
 {
 	if (!m_bActive) return;
@@ -772,6 +830,7 @@ void CGameFramework::FrameAdvance()
 
 	case GAMESTATE::INGAME:
 		ProcessInput();
+		ProcessEventQueue();
 
 		m_pPlayer->Animate(fTimeElapsed);
 		m_pScene->Animate(fTimeElapsed);

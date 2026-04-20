@@ -15,45 +15,6 @@ void CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam,
 
 void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
-	switch (nMessageID)
-	{
-		case WM_KEYDOWN:
-			switch (wParam)
-			{
-				case '1':
-				case '2':
-				case '3':
-				case '4':
-				case '5':
-				case '6':
-				case '7':
-				case '8':
-				case '9':
-				{
-					int index = int(wParam - '1');
-
-					if (index >= 0 && index < static_cast<int>(m_ppObjects.size()))
-					{
-						CExplosiveObject* pExplosiveObject =
-							static_cast<CExplosiveObject*>(m_ppObjects[index].get());
-						pExplosiveObject->m_bBlowingUp = true;
-					}
-					break;
-				}
-				case 'B':
-					for (auto& object : m_ppObjects)
-					{
-						CExplosiveObject *pExplosiveObject = static_cast<CExplosiveObject *>(object.get());
-						pExplosiveObject->m_bBlowingUp = true;
-					}
-					break;
-				default:
-					break;
-			}
-			break;
-		default:
-			break;
-	}
 }
 
 void CScene::BuildObjects()
