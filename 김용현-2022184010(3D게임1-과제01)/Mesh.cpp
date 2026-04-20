@@ -243,6 +243,62 @@ CCubeMesh::~CCubeMesh(void)
 {
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+CPyramidMesh::CPyramidMesh(float fWidth, float fHeight, float fDepth) : CMesh(5)
+{
+	float fHalfWidth = fWidth * 0.5f;
+	float fHalfHeight = fHeight * 0.5f;
+	float fHalfDepth = fDepth * 0.5f;
+
+	CVertex v0(-fHalfWidth, -fHalfHeight, -fHalfDepth);
+	CVertex v1(+fHalfWidth, -fHalfHeight, -fHalfDepth);
+	CVertex v2(+fHalfWidth, -fHalfHeight, +fHalfDepth);
+	CVertex v3(-fHalfWidth, -fHalfHeight, +fHalfDepth);
+
+	CVertex top(0.0f, +fHalfHeight, 0.0f);
+
+	auto pBottomFace = std::make_unique<CPolygon>(4);
+	pBottomFace->SetVertex(0, v0);
+	pBottomFace->SetVertex(1, v1);
+	pBottomFace->SetVertex(2, v2);
+	pBottomFace->SetVertex(3, v3);
+	SetPolygon(0, std::move(pBottomFace));
+
+	auto pFrontFace = std::make_unique<CPolygon>(3);
+	pFrontFace->SetVertex(0, top);
+	pFrontFace->SetVertex(1, v1);
+	pFrontFace->SetVertex(2, v0);
+	SetPolygon(1, std::move(pFrontFace));
+
+	auto pRightFace = std::make_unique<CPolygon>(3);
+	pRightFace->SetVertex(0, top);
+	pRightFace->SetVertex(1, v2);
+	pRightFace->SetVertex(2, v1);
+	SetPolygon(2, std::move(pRightFace));
+
+	auto pBackFace = std::make_unique<CPolygon>(3);
+	pBackFace->SetVertex(0, top);
+	pBackFace->SetVertex(1, v3);
+	pBackFace->SetVertex(2, v2);
+	SetPolygon(3, std::move(pBackFace));
+
+	auto pLeftFace = std::make_unique<CPolygon>(3);
+	pLeftFace->SetVertex(0, top);
+	pLeftFace->SetVertex(1, v0);
+	pLeftFace->SetVertex(2, v3);
+	SetPolygon(4, std::move(pLeftFace));
+
+	m_xmOOBB = BoundingOrientedBox(
+		XMFLOAT3(0.0f, 0.0f, 0.0f),
+		XMFLOAT3(fHalfWidth, fHalfHeight, fHalfDepth),
+		XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)
+	);
+}
+
+CPyramidMesh::~CPyramidMesh()
+{
+}
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 CWallMesh::CWallMesh(float fWidth, float fHeight, float fDepth, int nSubRects) : CMesh((4 * nSubRects * nSubRects)+2)

@@ -75,7 +75,10 @@ void CScene::BuildObjects()
 	m_pWallsObject->m_pxmf4WallPlanes[5] = XMFLOAT4(0.0f, 0.0f, -1.0f, fHalfDepth);
 	m_pWallsObject->m_xmOOBBPlayerMoveCheck = BoundingOrientedBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(fHalfWidth, fHalfHeight, fHalfDepth * 0.05f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 
-	CCubeMesh *pObjectCubeMesh = new CCubeMesh(4.0f, 4.0f, 4.0f);
+	CCubeMesh *pObjectCubeMesh = new CCubeMesh(5.0f, 5.0f, 5.0f);
+	CCubeMesh* LongBoxMesh = new CCubeMesh(4.0f, 8.0f, 4.0f);
+	CCubeMesh* ShortBoxMesh = new CCubeMesh(6.0f, 3.0f, 6.0f);
+	CPyramidMesh* PyramidMesh = new CPyramidMesh(5.0f, 5.0f, 5.0f);
 
 	m_nObjects = 10;
 	m_ppObjects.clear();
@@ -92,7 +95,7 @@ void CScene::BuildObjects()
 	m_ppObjects.push_back(std::move(obj0));
 
 	auto obj1 = std::make_unique<CExplosiveObject>();
-	obj1->SetMesh(pObjectCubeMesh);
+	obj1->SetMesh(LongBoxMesh);
 	obj1->SetColor(RGB(0, 0, 255));
 	obj1->SetPosition(+13.5f, 0.0f, -14.0f);
 	obj1->SetRotationAxis(XMFLOAT3(1.0f, 1.0f, 0.0f));
@@ -102,7 +105,7 @@ void CScene::BuildObjects()
 	m_ppObjects.push_back(std::move(obj1));	
 
 	auto obj2 = std::make_unique<CExplosiveObject>();
-	obj2->SetMesh(pObjectCubeMesh);
+	obj2->SetMesh(ShortBoxMesh);
 	obj2->SetColor(RGB(0, 255, 0));
 	obj2->SetPosition(0.0f, +5.0f, 20.0f);
 	obj2->SetRotationAxis(XMFLOAT3(1.0f, 1.0f, 0.0f));
@@ -112,7 +115,7 @@ void CScene::BuildObjects()
 	m_ppObjects.push_back(std::move(obj2));
 
 	auto obj3 = std::make_unique<CExplosiveObject>();
-	obj3->SetMesh(pObjectCubeMesh);
+	obj3->SetMesh(PyramidMesh);
 	obj3->SetColor(RGB(0, 255, 255));
 	obj3->SetPosition(0.0f, 0.0f, 0.0f);
 	obj3->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 1.0f));
@@ -122,7 +125,7 @@ void CScene::BuildObjects()
 	m_ppObjects.push_back(std::move(obj3));
 
 	auto obj4 = std::make_unique<CExplosiveObject>();
-	obj4->SetMesh(pObjectCubeMesh);
+	obj4->SetMesh(LongBoxMesh);
 	obj4->SetColor(RGB(128, 0, 255));
 	obj4->SetPosition(10.0f, 0.0f, 0.0f);
 	obj4->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
@@ -132,7 +135,7 @@ void CScene::BuildObjects()
 	m_ppObjects.push_back(std::move(obj4));
 
 	auto obj5 = std::make_unique<CExplosiveObject>();
-	obj5->SetMesh(pObjectCubeMesh);
+	obj5->SetMesh(ShortBoxMesh);
 	obj5->SetColor(RGB(255, 0, 255));
 	obj5->SetPosition(-10.0f, 0.0f, -10.0f);
 	obj5->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
@@ -152,7 +155,7 @@ void CScene::BuildObjects()
 	m_ppObjects.push_back(std::move(obj6));
 
 	auto obj7 = std::make_unique<CExplosiveObject>();
-	obj7->SetMesh(pObjectCubeMesh);
+	obj7->SetMesh(LongBoxMesh);
 	obj7->SetColor(RGB(255, 0, 128));
 	obj7->SetPosition(-10.0f, 10.0f, -20.0f);
 	obj7->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
@@ -162,7 +165,7 @@ void CScene::BuildObjects()
 	m_ppObjects.push_back(std::move(obj7));	
 
 	auto obj8 = std::make_unique<CExplosiveObject>();
-	obj8->SetMesh(pObjectCubeMesh);
+	obj8->SetMesh(ShortBoxMesh);
 	obj8->SetColor(RGB(128, 0, 255));
 	obj8->SetPosition(-15.0f, 10.0f, -30.0f);
 	obj8->SetRotationAxis(XMFLOAT3(1.0f, 1.0f, 0.0f));
@@ -172,7 +175,7 @@ void CScene::BuildObjects()
 	m_ppObjects.push_back(std::move(obj8));
 
 	auto obj9 = std::make_unique<CExplosiveObject>();
-	obj9->SetMesh(pObjectCubeMesh);
+	obj9->SetMesh(PyramidMesh);
 	obj9->SetColor(RGB(255, 64, 64));
 	obj9->SetPosition(+15.0f, 10.0f, 0.0f);
 	obj9->SetRotationAxis(XMFLOAT3(1.0f, 1.0f, 0.0f));
