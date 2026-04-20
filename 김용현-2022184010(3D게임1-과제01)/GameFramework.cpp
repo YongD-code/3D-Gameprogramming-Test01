@@ -295,13 +295,13 @@ void CGameFramework::RenderLoadingScreen()
 	int width = rcClient.right - rcClient.left;
 	int height = rcClient.bottom - rcClient.top;
 
-	int titleY = height / 3;
-	int percentY = titleY + height / 8;
-	int guideY = percentY + height / 8;
+	double titleY = height / 2.5;
+	double percentY = titleY + height / 3;
+	double guideY = percentY + height / 8;
 
 	int titleSize = max(32, height / 12);
-	int percentSize = max(22, height / 20);
-	int guideSize = max(16, height / 36);
+	int percentSize = max(24, height / 20);
+	int guideSize = max(24, height / 36);
 
 	DrawCenteredText(rcClient, _T("LOADING..."), titleY, titleSize, RGB(0, 0, 0), true);
 
@@ -312,7 +312,7 @@ void CGameFramework::RenderLoadingScreen()
 	_stprintf_s(szLoading, _T("%d%%"), nPercent);
 
 	DrawCenteredText(rcClient, szLoading, percentY, percentSize, RGB(0, 0, 0), false);
-	DrawCenteredText(rcClient, _T("잠시 후 시작 메뉴로 이동합니다"), guideY, guideSize, RGB(255, 255, 255), false);
+	DrawCenteredText(rcClient, _T("잠시 후 메뉴로 이동합니다"), guideY, guideSize, RGB(0, 0, 0), false);
 }
 
 void CGameFramework::RenderStartMenu()
