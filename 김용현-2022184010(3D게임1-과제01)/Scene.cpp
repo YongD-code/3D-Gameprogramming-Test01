@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Scene.h"
+#include "Sound.h"
 
 CScene::CScene()
 {
@@ -284,13 +285,25 @@ void CScene::CheckObjectByBulletCollisions()
 
 	for (auto& object : m_ppObjects)
 	{
+		CExplosiveObject* pExplosiveObject = static_cast<CExplosiveObject*>(object.get());
+
+		if (pExplosiveObject->m_bBlowingUp) continue;
+
 		for (auto& bullet : pAirplanePlayer->m_ppBullets)
 		{
-			if (bullet->m_bActive && object->m_xmOOBB.Intersects(bullet->m_xmOOBB))
+			if (!bullet->m_bActive) continue;
+
+			if (object->m_xmOOBB.Intersects(bullet->m_xmOOBB))
 			{
-				CExplosiveObject* pExplosiveObject = static_cast<CExplosiveObject*>(object.get());
 				pExplosiveObject->m_bBlowingUp = true;
+
+				if (m_pSound)
+				{
+					m_pSound->PlayEffect(_T("explode.wav"));
+				}
+
 				bullet->m_bActive = false;
+				break;
 			}
 		}
 	}

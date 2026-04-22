@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GameObject.h"
+#include "Sound.h"
 #include <memory>
 #include <array>
 
@@ -57,6 +58,7 @@ public:
 
 	float						m_fBulletEffectiveRange = 150.0f;
 	std::array<std::unique_ptr<CBulletObject>,BULLETS>	m_ppBullets;
+	CSound* m_pSound = NULL;
 
 	void FireBullet(CGameObject *pSelectedObject);
 

@@ -18,4 +18,6 @@ public:
 
 private:
 	bool m_SoundOn = true;
+	bool  m_bBGMPlaying = false;
+	TCHAR m_szCurrentBGM[MAX_PATH] = { 0 };
 };

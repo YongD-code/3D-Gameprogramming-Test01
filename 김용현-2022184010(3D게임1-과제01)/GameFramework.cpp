@@ -119,13 +119,13 @@ void CGameFramework::ChangeState(GAMESTATE eState)
 	case GAMESTATE::LOADING:
 		m_Loading = 0.0f;
 		m_Sound.StopBGM();
-		m_Sound.PlayBGM(_T("loading.wav"));
+		m_Sound.PlayBGM(_T("loading.mp3"));
 		break;
 
 	case GAMESTATE::STARTMENU:
 		m_StartMenuIdx = 0;
 		m_Sound.StopBGM();
-		m_Sound.PlayBGM(_T("menu.wav"));
+		m_Sound.PlayBGM(_T("menu.mp3"));
 		break;
 
 	case GAMESTATE::SETTINGS:
@@ -134,7 +134,7 @@ void CGameFramework::ChangeState(GAMESTATE eState)
 
 	case GAMESTATE::INGAME:
 		m_Sound.StopBGM();
-		m_Sound.PlayBGM(_T("game.wav"));
+		m_Sound.PlayBGM(_T("game.mp3"));
 		break;
 
 	case GAMESTATE::EXIT:
@@ -505,12 +505,12 @@ void CGameFramework::ExecuteSettingsMenu()
 		if (m_SoundOn)
 		{
 			if (m_eGameState == GAMESTATE::STARTMENU || m_eGameState == GAMESTATE::SETTINGS)
-				m_Sound.PlayBGM(_T("menu.wav"));
+				m_Sound.PlayBGM(_T("menu.mp3"));
 			else if (m_eGameState == GAMESTATE::LOADING)
-				m_Sound.PlayBGM(_T("loading.wav"));
+				m_Sound.PlayBGM(_T("loading.mp3"));
 
 			else if (m_eGameState == GAMESTATE::INGAME)
-				m_Sound.PlayBGM(_T("game.wav"));
+				m_Sound.PlayBGM(_T("game.mp3"));
 		}
 		break;
 
@@ -683,11 +683,13 @@ void CGameFramework::BuildObjects()
 	m_pPlayer->SetMesh(pAirplaneMesh);
 	m_pPlayer->SetColor(RGB(0, 0, 255));
 	m_pPlayer->SetCameraOffset(XMFLOAT3(0.0f, 5.0f, -15.0f));
+	static_cast<CAirplanePlayer*>(m_pPlayer.get())->m_pSound = &m_Sound;
 
 	m_pScene = std::make_unique<CScene>();
 	m_pScene->BuildObjects();
 
 	m_pScene->m_pPlayer = m_pPlayer.get();
+	m_pScene->m_pSound = &m_Sound;
 }
 
 void CGameFramework::ReleaseObjects()
@@ -782,7 +784,14 @@ void CGameFramework::ProcessEventQueue()
 			{
 				CExplosiveObject* pExplosiveObject =
 					static_cast<CExplosiveObject*>(m_pScene->m_ppObjects[event.nObjectIndex].get());
-				pExplosiveObject->m_bBlowingUp = true;
+				if (!pExplosiveObject->m_bBlowingUp)
+				{
+					pExplosiveObject->m_bBlowingUp = true;
+					if (m_SoundOn)
+					{
+						m_Sound.PlayEffect(_T("explosion.wav"));
+					}
+				}
 			}
 			break;
 		}
@@ -794,7 +803,14 @@ void CGameFramework::ProcessEventQueue()
 				{
 					CExplosiveObject* pExplosiveObject =
 						static_cast<CExplosiveObject*>(object.get());
-					pExplosiveObject->m_bBlowingUp = true;
+					if (!pExplosiveObject->m_bBlowingUp)
+					{
+						pExplosiveObject->m_bBlowingUp = true;
+						if (m_SoundOn)
+						{
+							m_Sound.PlayEffect(_T("explosion.wav"));
+						}
+					}
 				}
 			}
 			break;

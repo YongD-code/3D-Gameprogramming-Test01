@@ -2,6 +2,7 @@
 
 #include "GameObject.h"
 #include "Player.h"
+#include "Sound.h"
 #include <vector>
 
 class CScene
@@ -11,6 +12,7 @@ public:
 	virtual ~CScene();
 
 	CPlayer						*m_pPlayer = NULL;
+	CSound						*m_pSound = NULL;
 
 	int							m_nObjects = 0;
 	std::vector<std::unique_ptr<CGameObject>>	m_ppObjects;
