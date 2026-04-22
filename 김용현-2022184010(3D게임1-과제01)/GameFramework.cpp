@@ -413,7 +413,7 @@ void CGameFramework::RenderStartMenu()
 		true
 	);
 
-	DrawCenteredText(rcClient, _T("방향키: 이동 / Enter: 선택"), guideY, guideSize, RGB(255, 255, 255), true);
+	DrawCenteredText(rcClient, _T("방향키: 이동 / Enter: 선택"), guideY, guideSize, RGB(255, 0, 0), true);
 }
 
 void CGameFramework::RenderSettingsMenu()
@@ -444,7 +444,7 @@ void CGameFramework::RenderSettingsMenu()
 	DrawSettingItem(_T("FULLSCREEN"), m_Fullscreen ? _T("ON") : _T("OFF"), itemBaseY + itemGap, (m_SettingMenuIdx == 1));
 	DrawSettingItem(_T("BACK"), _T("START MENU"), itemBaseY + itemGap * 2, (m_SettingMenuIdx == 2));
 
-	DrawCenteredText(rcClient, _T("방향키 : 이동 / 좌우 or ENTER : 변경 / ESC : 메뉴로"), guideY, guideSize, RGB(170, 170, 170), false);
+	DrawCenteredText(rcClient, _T("방향키 : 이동 / 좌우 or ENTER : 변경 / ESC : 메뉴로"), guideY, guideSize, RGB(255, 0, 0), false);
 }
 
 void CGameFramework::ExecuteStartMenu()
@@ -568,20 +568,20 @@ void CGameFramework::RenderFinishScreen()
 	int height = rcClient.bottom - rcClient.top;
 
 	int titleY = height / 4;
-	int infoY = height / 2;
+	int infoY = height - height/3;
 	int guideY = height - height / 6;
 
 	int titleSize = max(36, height / 10);
-	int infoSize = max(22, height / 22);
-	int guideSize = max(16, height / 36);
+	int infoSize = max(36, height / 22);
+	int guideSize = max(36, height / 36);
 
-	DrawCenteredText(rcClient, _T("FINISH!!!!!!"), titleY, titleSize, RGB(255, 255, 255), true);
+	DrawCenteredText(rcClient, _T("FINISH!!!!!!"), titleY, titleSize, RGB(255, 255, 0), true);
 
 	TCHAR szResult[128];
 	_stprintf_s(szResult, _T("개수 : %d"), m_nDestroyedCount);
-	DrawCenteredText(rcClient, szResult, infoY, infoSize, RGB(255, 220, 0), true);
+	DrawCenteredText(rcClient, szResult, infoY, infoSize, RGB(255, 0, 255), true);
 
-	DrawCenteredText(rcClient, _T("Enter 또는 ESC : 메뉴로"), guideY, guideSize, RGB(220, 220, 220), false);
+	DrawCenteredText(rcClient, _T("Enter 또는 ESC : 메뉴로"), guideY, guideSize, RGB(255, 0, 0), false);
 }
 
 void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
