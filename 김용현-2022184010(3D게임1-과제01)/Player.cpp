@@ -250,9 +250,10 @@ void CAirplanePlayer::FireBullet(CGameObject *pSelectedObject)
 		pBulletObject->SetFirePosition(xmf3FirePosition);
 		pBulletObject->SetMovingDirection(xmf3Direction);
 		pBulletObject->SetActive(true);
-		if (m_pSound)
+		if (m_pSound && !m_CheckFire)
 		{
 			m_pSound->PlayEffect(_T("bullet.wav"));
+			m_CheckFire = true;
 		}
 	}
 }

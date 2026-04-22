@@ -59,6 +59,7 @@ public:
 	float						m_fBulletEffectiveRange = 150.0f;
 	std::array<std::unique_ptr<CBulletObject>,BULLETS>	m_ppBullets;
 	CSound* m_pSound = NULL;
+	bool m_CheckFire = false;
 
 	void FireBullet(CGameObject *pSelectedObject);
 
