@@ -302,6 +302,11 @@ void CScene::CheckObjectByBulletCollisions()
 					m_pSound->PlayEffect(_T("explode.wav"));
 				}
 
+				if (m_pDestroyedCount)
+				{
+					(*m_pDestroyedCount)++;
+				}
+
 				bullet->m_bActive = false;
 				break;
 			}

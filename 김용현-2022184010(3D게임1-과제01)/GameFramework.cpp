@@ -137,6 +137,11 @@ void CGameFramework::ChangeState(GAMESTATE eState)
 		m_Sound.PlayBGM(_T("game.mp3"));
 		break;
 
+	case GAMESTATE::FINISH:
+		m_Sound.StopBGM();
+		m_Sound.PlayBGM(_T("menu.wav"));
+		break;
+
 	case GAMESTATE::EXIT:
 		m_Sound.StopBGM();
 		::PostQuitMessage(0);
@@ -175,6 +180,34 @@ void CGameFramework::DrawCenteredText(const RECT& rc, LPCTSTR pszText, int y, in
 	rcText.bottom = y + nHeight + 20;
 
 	::DrawText(m_hDCFrameBuffer, pszText, -1, &rcText, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+
+	::SelectObject(m_hDCFrameBuffer, hOldFont);
+	::DeleteObject(hFont);
+}
+
+void CGameFramework::DrawTopLeftText(LPCTSTR pszText, int x, int y, int nHeight, COLORREF color, bool bBold)
+{
+	HFONT hFont = ::CreateFont(
+		nHeight, 0, 0, 0,
+		bBold ? FW_BOLD : FW_NORMAL,
+		FALSE, FALSE, FALSE,
+		DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+		DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS,
+		_T("Malgun Gothic")
+	);
+
+	HFONT hOldFont = (HFONT)::SelectObject(m_hDCFrameBuffer, hFont);
+
+	::SetTextColor(m_hDCFrameBuffer, color);
+	::SetBkMode(m_hDCFrameBuffer, TRANSPARENT);
+
+	RECT rcText;
+	rcText.left = x;
+	rcText.top = y;
+	rcText.right = x + 300;
+	rcText.bottom = y + nHeight + 20;
+
+	::DrawText(m_hDCFrameBuffer, pszText, -1, &rcText, DT_LEFT | DT_TOP | DT_SINGLELINE);
 
 	::SelectObject(m_hDCFrameBuffer, hOldFont);
 	::DeleteObject(hFont);
@@ -524,6 +557,33 @@ void CGameFramework::ExecuteSettingsMenu()
 	}
 }
 
+void CGameFramework::RenderFinishScreen()
+{
+	RECT rcClient;
+	::GetClientRect(m_hWnd, &rcClient);
+
+	RenderMenuBackground();
+
+	int width = rcClient.right - rcClient.left;
+	int height = rcClient.bottom - rcClient.top;
+
+	int titleY = height / 4;
+	int infoY = height / 2;
+	int guideY = height - height / 6;
+
+	int titleSize = max(36, height / 10);
+	int infoSize = max(22, height / 22);
+	int guideSize = max(16, height / 36);
+
+	DrawCenteredText(rcClient, _T("FINISH!!!!!!"), titleY, titleSize, RGB(255, 255, 255), true);
+
+	TCHAR szResult[128];
+	_stprintf_s(szResult, _T("개수 : %d"), m_nDestroyedCount);
+	DrawCenteredText(rcClient, szResult, infoY, infoSize, RGB(255, 220, 0), true);
+
+	DrawCenteredText(rcClient, _T("Enter 또는 ESC : 메뉴로"), guideY, guideSize, RGB(220, 220, 220), false);
+}
+
 void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	if (m_eGameState != GAMESTATE::INGAME) return;
@@ -639,6 +699,16 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		}
 		break;
 
+	case GAMESTATE::FINISH:
+		switch (wParam)
+		{
+		case VK_RETURN:
+		case VK_ESCAPE:
+			ChangeState(GAMESTATE::STARTMENU);
+			break;
+		}
+		break;
+
 	case GAMESTATE::EXIT:
 		::PostQuitMessage(0);
 		break;
@@ -689,6 +759,7 @@ void CGameFramework::BuildObjects()
 	m_pScene->BuildObjects();
 
 	m_pScene->m_pPlayer = m_pPlayer.get();
+	m_pScene->m_pDestroyedCount = &m_nDestroyedCount;
 	m_pScene->m_pSound = &m_Sound;
 }
 
@@ -854,10 +925,20 @@ void CGameFramework::FrameAdvance()
 		m_pPlayer->Animate(fTimeElapsed);
 		m_pScene->Animate(fTimeElapsed);
 
+		if (m_nDestroyedCount >= m_nFinishTarget)
+		{
+			ChangeState(GAMESTATE::FINISH);
+			break;
+		}
+
 		ClearFrameBuffer(RGB(255, 255, 255));
 
 		m_pScene->Render(m_hDCFrameBuffer, m_pPlayer->m_pCamera.get());
 		m_pPlayer->Render(m_hDCFrameBuffer, m_pPlayer->m_pCamera.get());
+
+		TCHAR szCount[64];
+		_stprintf_s(szCount, _T("COUNT : %d / %d"), m_nDestroyedCount, m_nFinishTarget);
+		DrawTopLeftText(szCount, 20, 20, 24, RGB(255, 255, 255), true);
 
 		PresentFrameBuffer();
 
@@ -873,6 +954,12 @@ void CGameFramework::FrameAdvance()
 				m_pSelectedObject = NULL;
 			}
 		}
+		break;
+
+	case GAMESTATE::FINISH:
+		ClearFrameBuffer(RGB(18, 24, 40));
+		RenderFinishScreen();
+		PresentFrameBuffer();
 		break;
 
 	case GAMESTATE::EXIT:

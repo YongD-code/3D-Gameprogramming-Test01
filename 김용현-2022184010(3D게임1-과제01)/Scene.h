@@ -17,6 +17,7 @@ public:
 	int							m_nObjects = 0;
 	std::vector<std::unique_ptr<CGameObject>>	m_ppObjects;
 	std::unique_ptr<CWallsObject>				m_pWallsObject;
+	int* m_pDestroyedCount = NULL;
 
 	virtual void BuildObjects();
 	virtual void ReleaseObjects();

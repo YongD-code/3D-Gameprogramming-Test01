@@ -16,6 +16,7 @@ enum class GAMESTATE
 	STARTMENU,
 	SETTINGS,
 	INGAME,
+	FINISH,
 	EXIT
 };
 
@@ -57,7 +58,7 @@ private:
 
 	std::unique_ptr<CPlayer>		m_pPlayer;
 	std::unique_ptr<CScene>			m_pScene;
-	CGameObject* m_pSelectedObject = NULL;
+	CGameObject* m_pSelectedObject = NULL;	
 
 private:
 	GAMESTATE						m_eGameState = GAMESTATE::LOADING;
@@ -80,6 +81,9 @@ private:
 	CSound							m_Sound;
 
 	std::queue<GameEvent>			m_EventQueue;
+
+	int m_nDestroyedCount = 0;
+	const int m_nFinishTarget = 20;
 
 public:
 	void BuildFrameBuffer();
@@ -107,6 +111,7 @@ public:
 	void RenderMenuBackground();
 
 	void DrawCenteredText(const RECT& rc, LPCTSTR pszText, int y, int nHeight, COLORREF color, bool bBold);
+	void DrawTopLeftText(LPCTSTR pszText, int x, int y, int nHeight, COLORREF color, bool bBold);
 	void DrawMenuItem(LPCTSTR pszText, int y, bool bSelected, COLORREF baseColor);
 	void DrawSettingItem(LPCTSTR pszLeft, LPCTSTR pszRight, int y, bool bSelected);
 
@@ -119,4 +124,6 @@ public:
 	POINT							m_ptOldCursorPos;
 
 	_TCHAR							m_pszFrameRate[50];
+
+	void RenderFinishScreen();
 };
