@@ -51,23 +51,10 @@ void CMesh::SetPolygon(int nIndex, std::unique_ptr<CPolygon> pPolygon)
 	}
 }
 
-static COLORREF ApplyLighting(COLORREF baseColor, float intensity)
-{
-	intensity = max(0.2f, min(intensity, 1.0f));
-
-	int r = int(GetRValue(baseColor) * intensity);
-	int g = int(GetGValue(baseColor) * intensity);
-	int b = int(GetBValue(baseColor) * intensity);
-
-	return RGB(r, g, b);
-}
-
 void CMesh::Render(HDC hDCFrameBuffer, XMFLOAT4X4& xmf4x4World, CCamera* pCamera, COLORREF dwBaseColor, bool bSelected)
 {
 	XMFLOAT4X4 xmf4x4WorldView = Matrix4x4::Multiply(xmf4x4World, pCamera->m_xmf4x4View);
 	XMFLOAT4X4 xmf4x4Transform = Matrix4x4::Multiply(xmf4x4WorldView, pCamera->m_xmf4x4Projection);
-
-	XMFLOAT3 lightDir = Vector3::Normalize(XMFLOAT3(-0.4f, 0.7f, -0.6f));
 
 	for (int j = 0; j < m_nPolygons; j++)
 	{
@@ -115,16 +102,11 @@ void CMesh::Render(HDC hDCFrameBuffer, XMFLOAT4X4& xmf4x4World, CCamera* pCamera
 
 		if (fDotProduct <= 0.0f) continue;
 
-		float NdotL = Vector3::DotProduct(normal, lightDir);
-		float intensity = 0.25f + max(0.0f, NdotL) * 0.75f;
-
-		COLORREF litColor = ApplyLighting(dwBaseColor, intensity);
-
 		COLORREF edgeColor = bSelected ? RGB(255, 255, 0) : RGB(20, 20, 20);
 		int edgeWidth = bSelected ? 2 : 1;
 
 		HPEN hPen = ::CreatePen(PS_SOLID, edgeWidth, edgeColor);
-		HBRUSH hBrush = ::CreateSolidBrush(litColor);
+		HBRUSH hBrush = ::CreateSolidBrush(dwBaseColor);
 
 		HPEN hOldPen = (HPEN)::SelectObject(hDCFrameBuffer, hPen);
 		HBRUSH hOldBrush = (HBRUSH)::SelectObject(hDCFrameBuffer, hBrush);
