@@ -568,7 +568,7 @@ void CGameFramework::RenderFinishScreen()
 	int height = rcClient.bottom - rcClient.top;
 
 	int titleY = height / 4;
-	int infoY = height - height/3;
+	int infoY = height / 3;
 	int guideY = height - height / 6;
 
 	int titleSize = max(36, height / 10);
