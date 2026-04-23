@@ -612,15 +612,17 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 
 void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
-	if (m_eGameState == GAMESTATE::INGAME && nMessageID == WM_KEYUP)
+	if (nMessageID == WM_KEYUP)
 	{
-		if (wParam == VK_SPACE)
+		if (m_eGameState == GAMESTATE::INGAME && wParam == VK_SPACE)
 		{
 			auto* pAirplanePlayer = static_cast<CAirplanePlayer*>(m_pPlayer.get());
 			pAirplanePlayer->m_CheckFire = false;
 		}
 		return;
 	}
+
+	if (nMessageID != WM_KEYDOWN) return;
 
 	switch (m_eGameState)
 	{
